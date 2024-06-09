@@ -9,6 +9,8 @@ const upload = multer();
 router.post("/products/add",upload.single('image'), async(req,res) =>{
     try{
         const imageBuffer = req.file.buffer;
+        let stringPrecio = req.body.price.toString().replace(",",".");
+        let tmpPrice = parseFloat(stringPrecio);
         let availability;
         if (req.body.availability === "True") {
             availability = true;
@@ -19,7 +21,7 @@ router.post("/products/add",upload.single('image'), async(req,res) =>{
         const product = new Product({
             name: req.body.name,
             description: req.body.description,
-            price:req.body.price,
+            price:tmpPrice,
             availability: availability,
             image:imageBuffer,
             type:req.body.type
@@ -84,6 +86,9 @@ router.patch("/products/updateProduct/:id",upload.single('image'), async(req,res
 
     const objectId = ObjectId.createFromHexString(req.params.id);
     try{
+        let stringPrecio = req.body.price.toString().replace(",",".");
+        let tmpPrice = parseFloat(stringPrecio);
+        req.body.price = tmpPrice;
         if (req.body.availability === "True") {
             req.body.availability = true;
         }

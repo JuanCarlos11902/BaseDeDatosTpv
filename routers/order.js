@@ -4,18 +4,23 @@ const router = new express.Router();
 const io = require('../socket/socket');
 
 router.post("/order/add", async(req,res) =>{
+    const tmpDate = Date.now();
+    const date1 = new Date(tmpDate);
+    let stringPrecio = req.body.totalPrice.toString().replace(",",".");
+    let tmpPrice = parseFloat(stringPrecio);
     const order = new Order({
         tableNumber: req.body.tableNumber,
         products: req.body.products,
-        totalPrice: req.body.totalPrice,
+        totalPrice: tmpPrice,
         orderDescription: req.body.orderDescription,
-        orderStatus:'pending'
+        orderStatus:'pending',
+        date: new Date(date1.getFullYear(), date1.getMonth(), date1.getDate(), date1.getHours(), date1.getMinutes(), date1.getSeconds(), date1.getMilliseconds())
     });
     try{
         await order.save();
         await order.populate('products');
         console.log(order);
-        io.getIO().emit('orderAdded', order);
+        await io.getIO().emit('orderAdded', order);
         res.status(200).send(order);
     }
     catch(e){
@@ -93,6 +98,33 @@ router.get("/order/getOrdersOfToday", async(req,res) =>{
     ).populate('products');
     try{
         res.status(200).send(orders);
+    }
+    catch(e){
+        res.status(500).send(e);
+    }
+})
+
+router.patch("/order/completeOrder/:id", async(req,res) =>{
+    const updates = Object.keys(req.body);
+    const allowedUpdates = ["orderStatus"];
+    const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
+
+    if(!isValidOperation){
+        return res.status(500).send("Invalid Operations")
+    }
+
+    try{
+        const order = await Order.findOne({_id: req.params.id});
+        if (!order) {
+            return res.status(404).send()
+        }
+
+        updates.forEach(update => {
+            order[update] = req.body[update]
+        });
+
+        await order.save();
+        await res.send(order);
     }
     catch(e){
         res.status(500).send(e);

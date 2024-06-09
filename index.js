@@ -2,6 +2,7 @@ const express = require('express');
 require('./db/mongoose');
 const orderRouter = require('./routers/order');
 const productsRouter = require('./routers/routerProducts');
+const checkRouter = require('./routers/check');
 const socketConfig = require('./socket/socket');
 const cors = require('cors');
 const app = express();
@@ -16,6 +17,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(orderRouter);
 app.use(productsRouter);
+app.use(checkRouter);
 
 server.listen(port, () => {
     console.log(`Servidor escuchando en el puerto ${port}`);

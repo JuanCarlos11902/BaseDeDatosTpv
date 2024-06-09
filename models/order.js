@@ -1,3 +1,4 @@
+
 const mongoose = require("mongoose");
 
 const orderSchema = mongoose.Schema({
@@ -23,7 +24,7 @@ const orderSchema = mongoose.Schema({
     },
     date:{
         type:Date,
-        default:Date.now()
+        default:Date.now
     }
 })
 
