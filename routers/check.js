@@ -21,32 +21,36 @@ router.post("/check/add", async(req,res) =>{
     }
 })
 
-router.get("/check/getCheckOfToday", async(req,res) =>{
-    const checks = await Check.find({
-        date: {
-            $gte: new Date(new Date().setHours(0, 0, 0, 0)),
-            $lt: new Date(new Date().setHours(23, 59, 59, 999))
-        },
-        checkStatus: 'pending'
-    }
-    ).populate('orders');
-    try{
-        if (checks.length == 0) {
+router.get("/check/getCheckOfToday", async (req, res) => {
+    try {
+        const checks = await Check.find({
+            date: {
+                $gte: new Date(new Date().setHours(0, 0, 0, 0)),
+                $lt: new Date(new Date().setHours(23, 59, 59, 999))
+            },
+            checkStatus: 'pending'
+        }).populate({
+            path: 'orders',
+            populate: {
+                path: 'products'
+            }
+        });
+
+        if (checks.length === 0) {
             res.send(new Check({
                 orders: [],
                 totalPrice: 0,
                 date: new Date(),
                 checkStatus: 'notCreated'
             }));
-        }
-        else{
+        } else {
             res.send(checks[0]);
         }
+    } catch (e) {
+        res.status(500).send(e);
     }
-    catch(e){
-        res.status(500).send(e)
-    }
-})
+});
+
 
 router.patch("/check/update/:id", async(req,res) =>{
     const updates = Object.keys(req.body);

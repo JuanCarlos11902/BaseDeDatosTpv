@@ -77,6 +77,7 @@ router.get("/products/getAllIfAvailabilityIsTrue",async(req,res) =>{
 
 router.patch("/products/updateProduct/:id",upload.single('image'), async(req,res) =>{
     const updates = Object.keys(req.body);
+    product.image = req.file.buffer;
     const allowedUpdates = ["name","description","price", "availability", "type"];
     const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
 
@@ -96,7 +97,6 @@ router.patch("/products/updateProduct/:id",upload.single('image'), async(req,res
             req.body.availability = false;
         }
         const product = await Product.findOne({_id: objectId});
-        product.image = req.file.buffer;
         if (!product) {
             return res.status(404).send()
         }
