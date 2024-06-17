@@ -29,12 +29,8 @@ router.post("/order/add", async(req,res) =>{
 })
 
 router.delete("/order/delete/:id", async(req,res) =>{
-    const order = Order.findOneAndDelete({_id:req.params.id});
-    const tempOrder = order;
     try{
-         if(!order){
-            await res.status(404).send();
-        }
+        Order.findOneAndDelete({_id:req.params.id});
     }
     catch(e){
         res.status(500).send(e);
