@@ -35,9 +35,6 @@ router.delete("/order/delete/:id", async(req,res) =>{
          if(!order){
             await res.status(404).send();
         }
-        else{
-            await res.send(tempOrder);
-        }
     }
     catch(e){
         res.status(500).send(e);
