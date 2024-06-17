@@ -75,44 +75,44 @@ router.get("/products/getAllIfAvailabilityIsTrue",async(req,res) =>{
     }
 })
 
-router.patch("/products/updateProduct/:id",upload.single('image'), async(req,res) =>{
+router.patch("/products/updateProduct/:id", upload.single('image'), async (req, res) => {
     const updates = Object.keys(req.body);
-    product.image = req.file.buffer;
-    const allowedUpdates = ["name","description","price", "availability", "type"];
-    const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
+    const allowedUpdates = ["name", "description", "price", "availability", "type"];
+    const isValidOperation = updates.every((update) => allowedUpdates.includes(update));
 
-    if(!isValidOperation){
-        return res.status(500).send("Invalid Operations")
+    if (!isValidOperation) {
+        return res.status(500).send("Invalid Operations");
     }
 
     const objectId = ObjectId.createFromHexString(req.params.id);
-    try{
-        let stringPrecio = req.body.price.toString().replace(",",".");
+
+    try {
+        let stringPrecio = req.body.price.toString().replace(",", ".");
         let tmpPrice = parseFloat(stringPrecio);
         req.body.price = tmpPrice;
-        if (req.body.availability === "True") {
-            req.body.availability = true;
-        }
-        else{
-            req.body.availability = false;
-        }
-        const product = await Product.findOne({_id: objectId});
+
+        req.body.availability = req.body.availability === "True" ? true : false;
+
+        const product = await Product.findOne({ _id: objectId });
         if (!product) {
-            return res.status(404).send()
+            return res.status(404).send();
         }
 
         updates.forEach(update => {
-            product[update] = req.body[update]
+            product[update] = req.body[update];
         });
 
+        if (req.file) {
+            product.image = req.file.buffer;
+        }
+
         await product.save();
-        io.getIO().emit('productUpdated', {product});
+        io.getIO().emit('productUpdated', { product });
         res.send(product);
-    }
-    catch(e){
+    } catch (e) {
         res.status(500).send(e);
     }
-})
+});
 
 router.patch("/products/changeAvailability/:id",async(req,res) =>{
 
