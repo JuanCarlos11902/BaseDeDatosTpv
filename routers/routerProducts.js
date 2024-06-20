@@ -102,7 +102,7 @@ router.patch("/products/updateProduct/:id", upload.single('image'), async (req, 
             product[update] = req.body[update];
         });
 
-        if (req.file) {
+        if (req.file.image) {
             product.image = req.file.buffer;
         }
 
